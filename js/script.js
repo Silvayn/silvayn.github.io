@@ -1,150 +1,157 @@
-let win = $(window),
+let win = $(window);
 foo = $('#typer');
-foo.typer(['Développeur Web PHP', 'Développeur FullStack JavaScript']);
+foo.typer(['Développeur Front-End', 'Développeur FullStack JavaScript', 'Développeur PHP']);
 
 $(function(){
-/* SMOOTH SCROLL */
-$('.js-scrollTo').on('click', function() { // Au clic sur un élément
-  let page = $(this).attr('href'); // Page cible
-  let speed = 750; // Durée de l'animation (en ms)
-  $('html, body').animate( { scrollTop: $(page).offset().top }, speed ); // Go
-  return false;
-});
 
-/* FIXED NAVBAR */
-$(window).on("scroll", function() {
-  if($(window).scrollTop()) {
-    $('.navbar-fixed-top').addClass('black');
-  }else {
-    $('.navbar-fixed-top').removeClass('black');
-  }
-})
+    /* AJAX CONTACT FROM */
+    $('#contact-form').submit(function(e){
+        e.preventDefault();
+        let postData = $('#contact-form').serialize();
 
-/* OPEN NAV */
-$('.openbtn').click(function(){
-  $('#mySidenav').css('width', '250px').css('cursor', 'pointer');
-  $('.navbar-fixed-top').hide();
+        $.ajax({
+            method: "POST",
+            url: "./contact.php",
+            data: postData,
+            dataType: 'json',
+            error: function(){
+                $('#contact-form').prepend('Erreur lors du chargment de la page !');
+            },
+            success: function(result) {
 
-});
+                if(result.isSuccess){
+                    $('#contact-form').prepend('<div class="success">Le message à bien été envoyé. Merci de m\'avoir contacté !</div>');
+                    $('#contact-form')[0].reset();
+                } else {
+                    $('#contact-form').prepend().html(result.error);
+                }
+            }
+        });
+    });
 
-/* CLOSE NAV */
-$('.closebtn').click(function(){
-  $('#mySidenav').css('width', '0');
-  $('.navbar-fixed-top').show();
-});
+    /* SMOOTH SCROLL */
+    $('.js-scrollTo').on('click', function() { // Au clic sur un élément
+        let page = $(this).attr('href'); // Page cible
+        let speed = 750; // Durée de l'animation (en ms) 
+        $('html, body').animate( { scrollTop: $(page).offset().top }, speed ); // Go
+        return false;
+    });
 
-/* IMGAGE THIMBNAIL */
-$('.item-description').hide();
-var toggleDescription = function(){
-  $(this).find('.item-description').toggle();
-}
-$('.item-thumbnail').mouseenter(toggleDescription).mouseleave(toggleDescription);
+    // $('body').scrollspy({ target: '#nav' });
 
-});
+    /* NAVBAR SCROLL */
+    $('#nav').hide();
+    $(window).scroll(function(){
+    	if($(window).scrollTop())
+    		$('#nav').show().addClass('navbar-active');
+    	else
+    		$('#nav').hide().removeClass('navbar-active');
+    });
+     
+    // SCROLL ANIMATION SECTION SKILL
+    $(window).scroll(function() {
+    $(".anm_mod").each(function() {
+     const position = $(this).offset().top;
+     const scroll = $(window).scrollTop();
+     const windowHeight = $(window).height();
+     if (scroll > 950) {
+      $(this).addClass("active-scroll");
+     }
+     if (scroll < 100) {
+      $(this).removeClass("active-scroll");
+     }
+    });  
+   });
 
-
-// PARTICULES JS
-const particlesJSON = {
-  "particles": {
-      "number": {
-          "value": 40,
-          "density": {
-              "enable": true,
-              "value_area": 500
-          }
-      },
-      "color": {
-          "value": "#ccc"//gris
-      },
-      "shape": {
-          "type": "polygon",
-          "stroke": {
-              "width": 2,
-              "color": "#ccc"//gris
-          },
-          "polygon": {
-              "nb_sides": 6
-          },
-          "image": {
-              "src": "img/github.svg",
-              "width": 100,
-              "height": 100
-          }
-      },
-      "opacity": {
-          "value": 0.5,
-          "random": true
-      },
-      "size": {
-          "value": 10,
-          "random": true
-      },
-      "line_linked": {
-          "enable": false,
-          "distance": 200,
-          "color": "#ccc",//gris
-          "opacity": 0.3,
-          "width": 2
-      },
-      "move": {
-          "enable": true,
-          "speed": 5,
-          "direction": "bottom",
-          "random": true,
-          "straight": true,
-          "out_mode": "out",
-          "bounce": false,
-          "attract": {
-              "enable": false,
-              "rotateX": 600,
-              "rotateY": 1200
-          }
+    // SCROLL COUNTER NUMBERS
+    const scroll = $(window).scrollTop();
+    (function ($) {
+        $.fn.countTo = function (options) {
+            options = options || {};
+            return $(this).each(function () {
+                // set options for current element
+                var settings = $.extend({}, $.fn.countTo.defaults, {
+                    from:            $(this).data('from'),
+                    to:              $(this).data('to'),
+                    speed:           $(this).data('speed'),
+                    refreshInterval: $(this).data('refresh-interval'),
+                    decimals:        $(this).data('decimals')
+                }, options);
+                // how many times to update the value, and how much to increment the value on each update
+                var loops = Math.ceil(settings.speed / settings.refreshInterval),
+                    increment = (settings.to - settings.from) / loops;
+                // references & variables that will change with each update
+                var self = this,
+                    $self = $(this),
+                    loopCount = 0,
+                    value = settings.from,
+                    data = $self.data('countTo') || {};
+                $self.data('countTo', data);
+                // if an existing interval can be found, clear it first
+                if (data.interval) {
+                    clearInterval(data.interval);
+                }
+                data.interval = setInterval(updateTimer, settings.refreshInterval);
+                // initialize the element with the starting value
+                render(value);
+                function updateTimer() {
+                    value += increment;
+                    loopCount++;
+                    render(value);
+                    if (typeof(settings.onUpdate) == 'function') {
+                        settings.onUpdate.call(self, value);
+                    }
+                    if (loopCount >= loops) {
+                        // remove the interval
+                        $self.removeData('countTo');
+                        clearInterval(data.interval);
+                        value = settings.to;
+                        if (typeof(settings.onComplete) == 'function') {
+                            settings.onComplete.call(self, value);
+                        }
+                    }
+                }
+                function render(value) {
+                    var formattedValue = settings.formatter.call(self, value, settings);
+                    $self.html(formattedValue);
+                }
+            });
+        };
+        $.fn.countTo.defaults = {
+            from: 0,               // the number the element should start at
+            to: 0,                 // the number the element should end at
+            speed: 1000,           // how long it should take to count between the target numbers
+            refreshInterval: 100,  // how often the element should be updated
+            decimals: 0,           // the number of decimal places to show
+            formatter: formatter,  // handler for formatting the value before rendering
+            onUpdate: null,        // callback method for every time the element is updated
+            onComplete: null       // callback method for when the element finishes updating
+        };
+        function formatter(value, settings) {
+            return value.toFixed(settings.decimals);
+        }
+    }(jQuery));
+    // if (scroll > 0) {
+        jQuery(function ($) {
+      // custom formatting example
+      $('.count-number').data('countToOptions', {
+        formatter: function (value, options) {
+          return value.toFixed(options.decimals).replace(/\B(?=(?:\d{3})+(?!\d))/g, ',');
+        }
+      });
+      // start all the timers
+      $('.timer').each(count);  
+      function count(options) {
+        var $this = $(this);
+        options = $.extend({}, options || {}, $this.data('countToOptions') || {});
+        $this.countTo(options);
       }
-  },
-  "interactivity": {
-      "detect_on": "canvas",
-      "events": {
-          "onhover": {
-              "enable": true,
-              "mode": [
-                  "grab",
-                  "bubble"
-              ]
-          },
-          "onclick": {
-              "enable": true,
-              "mode": "push"
-          },
-          "resize": true
-      },
-      "modes": {
-          "grab": {
-              "distance": 400,
-              "line_linked": {
-                  "opacity": 0.7
-              }
-          },
-          "bubble": {
-              "distance": 600,
-              "size": 12,
-              "duration": 1,
-              "opacity": 0.8,
-              "speed": 2
-          },
-          "repulse": {
-              "distance": 400,
-              "duration": 0.4
-          },
-          "push": {
-              "particles_nb": 20
-          },
-          "remove": {
-              "particles_nb": 10
-          }
-      }
-  },
-  "retina_detect": true
-}
+    });
+    // }
 
-particlesJS("particles-js", particlesJSON)
+});
 
+// $(window).scroll( function() { 
+//     var scrolled_val = $(document).scrollTop().valueOf();
+//     alert(scrolled_val+ ' = scroll value');
+//    });
